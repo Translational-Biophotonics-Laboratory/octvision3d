@@ -1,0 +1,4 @@
+.venv*/
+*.tif*
+*.seg.nrrd
+
