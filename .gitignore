@@ -1,4 +1,6 @@
 .venv*/
 *.tif*
 *.seg.nrrd
+*.egg-info/
+*.egg
 
