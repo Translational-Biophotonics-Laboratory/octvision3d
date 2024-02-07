@@ -3,4 +3,5 @@
 *.seg.nrrd
 *.egg-info/
 *.egg
+.ipynb_checkpoints/
 
