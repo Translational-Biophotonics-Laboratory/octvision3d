@@ -21,7 +21,11 @@ def add_segmentation_to_header(nrrd_file_path, new_segment_name, new_segment_col
     data, header = nrrd.read(nrrd_file_path)
 
     if new_segment_name in set([i for i in header.values() if type(i)==str]):
-        raise ValueError("Segment name {new_segment_name} already in {nrrd_file_path}")
+        if not FLAGS.force:
+            raise ValueError(f"Segment name {new_segment_name} already in {nrrd_file_path}")
+        else:
+            print(f"WARNING: Segment name {new_segment_name} already in {nrrd_file_path}... SKIPPING")
+            return
 
     new_data = np.append(data, np.zeros([1] + list(data.shape[1:]), dtype=data.dtype), axis=0)
 
@@ -46,7 +50,6 @@ def add_segmentation_to_header(nrrd_file_path, new_segment_name, new_segment_col
 
         copied_odict[key] = value
 
-
     # Save the NRRD file with the updated header
     nrrd.write(nrrd_file_path, new_data, copied_odict)
 
@@ -61,6 +64,12 @@ if __name__ == "__main__":
         required=True,
         help="Path to .seg.nrrd files to add new segments to"
     )
+    parser.add_argument(
+        "--force",
+        type=bool,
+        default=False,
+        help="Ignore duplicate and just skip over it"
+    )
     FLAGS, _ = parser.parse_known_args()
 
     cmap = OrderedDict([
@@ -71,8 +80,8 @@ if __name__ == "__main__":
         ("SHS", "0.69 0.99 0.82"),
         ("ART", "0.99 0.99 0.33"),
         ("ERM", "0.22 0.49 0.97"),
+        ("SES", "0.392 0.196 0.0"),
     ])
     for f in tqdm(get_file_paths(FLAGS.path, "seg.nrrd")):
         for k, v in cmap.items():
             add_segmentation_to_header(f, k, v)
-
