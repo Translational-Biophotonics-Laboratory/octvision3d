@@ -84,15 +84,15 @@ if __name__ == "__main__":
     ])
 
     # Load the NRRD file
-    data, header = nrrd.read(nrrd_file_path)
 
     for f in tqdm(get_file_paths(FLAGS.path, "seg.nrrd")):
+        data, header = nrrd.read(f)
         for k, v in cmap.items():
             add_segmentation_to_header(data, header, f, k, v)
 
-    header_vals = set([i for i in header.values() if type(i)==str])
-    labels = ["CNV", "DRU", "EX", "FLU", "GA", "HEM", "RPE", "RET",\
-              "CHO", "VIT", "HYA", "SHS", "ART", "ERM", "SES"]
-    for label in labels:
-        assert label in header_vals
+        header_vals = set([i for i in header.values() if type(i)==str])
+        labels = ["CNV", "DRU", "EX", "FLU", "GA", "HEM", "RPE", "RET",\
+                  "CHO", "VIT", "HYA", "SHS", "ART", "ERM", "SES"]
+        for label in labels:
+            assert label in header_vals
 
