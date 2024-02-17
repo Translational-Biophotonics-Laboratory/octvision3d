@@ -8,17 +8,17 @@ from tqdm import tqdm
 from glob import glob
 from collections import OrderedDict
 
-def add_segmentation_to_header(nrrd_file_path, new_segment_name, new_segment_color):
+def add_segmentation_to_header(data, header, nrrd_file_path, new_segment_name, new_segment_color):
     """
     Adds a new segmentation entry to the NRRD file header.
 
+    :param data: nrrd bitmap data.
+    :param header: nrrd header OrderedDict
     :param nrrd_file_path: Path to the NRRD file.
     :param new_segment_id: The ID for the new segment.
     :param new_segment_name: The name for the new segment.
     :param new_segment_color: The color for the new segment in the format 'R G B'.
     """
-    # Load the NRRD file
-    data, header = nrrd.read(nrrd_file_path)
 
     if new_segment_name in set([i for i in header.values() if type(i)==str]):
         if not FLAGS.force:
@@ -82,6 +82,17 @@ if __name__ == "__main__":
         ("ERM", "0.22 0.49 0.97"),
         ("SES", "0.392 0.196 0.0"),
     ])
+
+    # Load the NRRD file
+    data, header = nrrd.read(nrrd_file_path)
+
     for f in tqdm(get_file_paths(FLAGS.path, "seg.nrrd")):
         for k, v in cmap.items():
-            add_segmentation_to_header(f, k, v)
+            add_segmentation_to_header(data, header, f, k, v)
+
+    header_vals = set([i for i in header.values() if type(i)==str])
+    labels = ["CNV", "DRU", "EX", "FLU", "GA", "HEM", "RPE", "RET",\
+              "CHO", "VIT", "HYA", "SHS", "ART", "ERM", "SES"]
+    for label in labels:
+        assert label in header_vals
+
