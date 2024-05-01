@@ -1,5 +1,6 @@
 from glob import glob
 import numpy as np
+import json
 import cv2
 import re
 import os
@@ -54,3 +55,46 @@ def overlay_segments(bitmap, colors):
             final_images[i] += bgr_image * color
 
     return final_images
+
+def create_dataset_dirs(path):
+    for i in ["imagesTr", "imagesTs", "labelsTr", "labelsTs"]:
+        if not os.path.exists(os.path.join(path, i)):
+            os.makedirs(os.path.join(path, i), exist_ok=True)
+
+def save_json(obj, file: str, indent: int = 4, sort_keys: bool = True) -> None:
+    with open(file, 'w') as f:
+        json.dump(obj, f, sort_keys=sort_keys, indent=indent)
+
+def generate_dataset_json(output_folder: str,
+                          channel_names: dict,
+                          labels: dict,
+                          num_training_cases: int,
+                          file_ending: str,
+                          dataset_name: str = None, reference: str = None, release: str = None, license: str = None,
+                          description: str = None):
+    
+    # channel names need strings as keys
+    # label values need ints as values
+    for k in list(channel_names.keys()):
+        assert isinstance(k, str)
+    for k, v in labels.items():
+        assert isinstance(v, int)
+    
+    dataset_json = {
+        'channel_names': channel_names,
+        'labels': labels,
+        'numTraining': num_training_cases,
+        'file_ending': file_ending,
+    }
+    if dataset_name is not None:
+        dataset_json['name'] = dataset_name
+    if reference is not None:
+        dataset_json['reference'] = reference
+    if release is not None:
+        dataset_json['release'] = release
+    if license is not None:
+        dataset_json['licence'] = license
+    if description is not None:
+        dataset_json['description'] = description
+    
+    save_json(dataset_json, os.path.join(output_folder, 'dataset.json'), sort_keys=False)
