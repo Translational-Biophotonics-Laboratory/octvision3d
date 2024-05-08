@@ -1,0 +1,9 @@
+.venv*/
+*.tif*
+*.seg.nrrd
+*.egg-info/
+*.egg
+.ipynb_checkpoints/
+.DS_Store
+__pycache__
+
