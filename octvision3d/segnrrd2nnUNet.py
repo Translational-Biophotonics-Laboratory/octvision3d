@@ -51,7 +51,6 @@ def segnrrd2nnUNet(path):
     
     for vol_path, seg_path in tqdm(zip(vol_paths, seg_paths), total=len(vol_paths)):
         # Ensure corresponding volume and segmentation files match by their basename
-        print(vol_path, seg_path)
         assert vol_path.split(".")[0] == seg_path.split(".")[0]
         
         vol_name = os.path.splitext(os.path.basename(vol_path))[0]
@@ -60,6 +59,8 @@ def segnrrd2nnUNet(path):
         # Load TIFF volume and segmentation NRRD labels
         vol = tif.imread(vol_path)
         bitmap, header = nrrd.read(seg_path)
+
+        rgb_vol = np.stack((vol,) * 3, axis=-1)
 
         # Convert one-hot encoded bitmap to label array, flipping axes from (X, Y, Z) to (Z, Y, X)
         labels = np.argmax(bitmap, axis=0).T
@@ -72,7 +73,7 @@ def segnrrd2nnUNet(path):
         # Save volume and label images as TIFF files
         output_tif = os.path.join(imagesTr, f"{vol_name}_0000.tif")
         output_labels = os.path.join(labelsTr, f"{seg_name}.tif")
-        tif.imwrite(output_tif, vol, photometric='minisblack')
+        tif.imwrite(output_tif, rgb_vol, photometric='rgb')
         tif.imwrite(output_labels, labels, photometric='minisblack')
 
     # Generate the dataset JSON file required by nnU-Net
