@@ -60,11 +60,9 @@ def segnrrd2nnUNet(path):
         vol = tif.imread(vol_path)
         bitmap, header = nrrd.read(seg_path)
 
-        rgb_vol = np.stack((vol,) * 3, axis=-1)
-
         # Convert one-hot encoded bitmap to label array, flipping axes from (X, Y, Z) to (Z, Y, X)
         labels = np.argmax(bitmap, axis=0).T
-        
+
         # Save spacing information as JSON
         spacing = [81.0, 1.0, 2.9]
         save_json({"spacing": spacing}, os.path.join(imagesTr, f"{vol_name}.json"))
@@ -73,8 +71,9 @@ def segnrrd2nnUNet(path):
         # Save volume and label images as TIFF files
         output_tif = os.path.join(imagesTr, f"{vol_name}_0000.tif")
         output_labels = os.path.join(labelsTr, f"{seg_name}.tif")
-        tif.imwrite(output_tif, rgb_vol, photometric='rgb')
+        tif.imwrite(output_tif, vol, photometric='minisblack')
         tif.imwrite(output_labels, labels, photometric='minisblack')
+
 
     # Generate the dataset JSON file required by nnU-Net
     generate_dataset_json(output_path, 
