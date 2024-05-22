@@ -55,7 +55,7 @@ if __name__ == "__main__":
         "--output_name",
         type=str,
         default="",
-        help="Name of output TIFF file"
+        help="Name of output TIFF file including the extension"
     )
     FLAGS, _ = parser.parse_known_args()
 
@@ -68,6 +68,7 @@ if __name__ == "__main__":
     downsampled_data = downsample(vol)
 
     if FLAGS.output_dir and FLAGS.output_name:
-        tif.imwrite(f"{FLAGS.output_dir}/{FLAGS.output_name}.tif", downsampled_data.T)
+        tif.imwrite(f"{FLAGS.output_dir}/{FLAGS.output_name}", downsampled_data.T)
+        print(f"Saved to {FLAGS.output_dir}/{FLAGS.output_name}")
     else:
         raise ValueError("Need to specify --output_dir and --output_name in order to save new TIFF file")
