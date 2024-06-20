@@ -71,7 +71,10 @@ if __name__ == "__main__":
     for f in tqdm(get_file_paths(FLAGS.path, "tif")):
         if "slo" not in f:
             nrrd_f = os.path.splitext(f)[0] + ".seg.nrrd"
-            print(f, nrrd_f)
+            #print(f, nrrd_f)
+            if os.path.exists(nrrd_f):
+                print(f"Skipping {f}...{nrrd_f} already exists")
+                continue
             data = np.zeros((len(cmap.keys()), 1, 1, 1), dtype=np.uint8)
             for k, v in cmap.items():
                 add_new_segnrrd(nrrd_f, header, cmap, data)
