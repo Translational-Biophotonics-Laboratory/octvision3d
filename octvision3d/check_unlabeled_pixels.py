@@ -46,6 +46,9 @@ def main():
         # load from .seg.nrrd file
         bitmap, header = nrrd.read(filename)
 
+        if bitmap.shape[0] != 15:
+            raise AssertionError(f"segmentation shape should have 15 labels. {filename} has {bitmap.shape[0]}")
+
         # get decimal rgb colors (0-1) from header file sorted (segment0, segment1,...)
         rgb_colors = sorted_rgb_colors(header)
 
