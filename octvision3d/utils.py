@@ -6,6 +6,9 @@ import re
 import os
 
 def get_filenames(path, ext):
+    def either(c):
+        return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c
+    ext = "".join(map(either, ext))
     return sorted(glob(f"{path}/*.{ext}"), key=_natural_sort_key)
 
 def create_directory(path):

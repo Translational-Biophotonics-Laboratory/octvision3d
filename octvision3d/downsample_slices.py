@@ -65,11 +65,12 @@ if __name__ == "__main__":
     else:
         vol = tif.imread(FLAGS.path).T
     
-    downsampled_data = downsample(vol)
+    if vol.shape[-1] > 19:
+        vol = downsample(vol)
 
     if FLAGS.output_dir and FLAGS.output_name:
         create_directory(FLAGS.output_dir)
-        tif.imwrite(f"{FLAGS.output_dir}/{FLAGS.output_name}", downsampled_data.T)
+        tif.imwrite(f"{FLAGS.output_dir}/{FLAGS.output_name}", vol.T)
         print(f"Saved to {FLAGS.output_dir}/{FLAGS.output_name}")
     else:
         raise ValueError("Need to specify --output_dir and --output_name in order to save new TIFF file")
