@@ -2,7 +2,7 @@ import numpy as np
 import tifffile as tif
 from scipy.ndimage import zoom
 from argparse import ArgumentParser
-from utils import get_filenames
+from utils import get_filenames, create_directory
 from pprint import pprint
 
 def downsample(data, target=19):
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     FLAGS, _ = parser.parse_known_args()
 
     if FLAGS.multifile:
-        filenames = get_filenames(FLAGS.path, ext="tif")
+        filenames = get_filenames(FLAGS.path, ext="tif*")
         vol = np.array([tif.imread(f) for f in filenames]).T
     else:
         vol = tif.imread(FLAGS.path).T
@@ -68,6 +68,7 @@ if __name__ == "__main__":
     downsampled_data = downsample(vol)
 
     if FLAGS.output_dir and FLAGS.output_name:
+        create_directory(FLAGS.output_dir)
         tif.imwrite(f"{FLAGS.output_dir}/{FLAGS.output_name}", downsampled_data.T)
         print(f"Saved to {FLAGS.output_dir}/{FLAGS.output_name}")
     else:
