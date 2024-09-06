@@ -35,8 +35,16 @@ if __name__ == "__main__":
 
     # Load the NRRD file
     data, header = nrrd.read(FLAGS.path)
+    print("Original shape:", data.shape)
+    # for i in range(data.shape[-1]-1):
+    #     for j in range(i+1, data.shape[-1]):
+    #         print("isEqual?", i, j, np.array_equal(data[:, :, :, i], data[:, :, :, j]))
 
-    new_bitmap_data = data[:, FLAGS.left:-1*FLAGS.right if FLAGS.right > 0 else data.shape[1]]
+    right_shift = -1*FLAGS.right if FLAGS.right > 0 else data.shape[1]
+
+    new_bitmap_data = data[:, FLAGS.left: right_shift]
+    new_bitmap_data = new_bitmap_data[:, :, :, 190:209]
+    print("Output shape:", new_bitmap_data.shape)
 
     # Add new segmentation information to the header
     pattern = re.compile(r"Segment(\d+)_Extent")

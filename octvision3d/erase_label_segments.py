@@ -129,44 +129,13 @@ def delete_by_name(data, header, name, original_labels):
 
     return new_data, new_header
             
-# Function checks that all original labels are present and in the correct order.
-def check_order_and_remove_extra_labels(data, header, original_labels):
-    name_tracker = list(map(list, zip(original_labels, [-1]*len(original_labels))))
-    idx = len(original_labels) - 1
-    new_header = header.copy()
-    new_data = data.copy()
-    for key, val in reversed(header.items()):
-        match = re.match(r"Segment(\d+)_", key)
-        if match:
-            if key.endswith("_Name"):
-                segment_number = int(match.group(1))
-                if val not in original_labels:
-                    if FLAGS.force:
-                        print(f"{val} is not in original labels. Force deleting...")
-                        new_data, new_header = delete_by_name(new_data, new_header, val, original_labels)
-                    else:
-                        raise ValueError(f"{val} not one of the original labels. Use --force to delete")
-                else:
-                    name_tracker[idx][1] = segment_number
-                    idx -= 1
-    for i, name in enumerate(name_tracker):
-        if i != name[1]:
-            raise ValueError("Original labels not in proper order")
-    return new_data, new_header
-
 def get_file_paths(path, ext):
     return sorted(glob(f"{path}/*.{ext}"))
 
-def get_corrected_header(data, header, original_labels):
-    # These labels should be present in every segmentation
-    for i in original_labels:
-        try:
-            assert segment_name_already_exists(header, i)
-        except AssertionError as e:
-            raise AssertionError(f"{i} label not found in header")
-    # Check that the labels are in the correct order
-    new_data, new_header = check_order_and_remove_extra_labels(data, header, original_labels)
-    return new_data, new_header 
+def remove_data_from_label(data, header, label):
+    label_idx = get_idx_of_label(header, label)
+    data[label_idx] = np.zeros(data[label_idx].shape)
+    return data
 
 def main():
     original_labels = ["CNV", "DRU", "EX", "FLU", "GA", "HEM", "RPE"]
@@ -181,38 +150,20 @@ def main():
         ("SES", "0.392 0.196 0.0"),
     ])
 
-
     # Load the NRRD file
-    for f in tqdm(get_file_paths(FLAGS.path, "seg.nrrd")):
-        startedAddingSegments = False
-
-        data, header = nrrd.read(f)
-
-        # run tests to ensure seg.nrrd header is correct
-        # deletes labels not in the original_labels
-        corrected_data, corrected_header = get_corrected_header(data, header, original_labels)
-        nrrd.write(f, corrected_data, corrected_header)
-
-        # Add new labels
-        for k, v in cmap.items():
+    if os.path.isdir(FLAGS.path):
+        for f in tqdm(get_file_paths(FLAGS.path, "seg.nrrd")):
             data, header = nrrd.read(f)
-            success = add_segmentation_to_header(data, header, f, k, v, startedAddingSegments)
-            if success and not startedAddingSegments:
-                startedAddingSegments = True
+            new_data = remove_data_from_label(data, header, FLAGS.label)
 
-        data, header = nrrd.read(f)
-        header_vals = set([i for i in header.values() if type(i)==str])
-        labels = ["CNV", "DRU", "EX", "FLU", "GA", "HEM", "RPE", "RET",\
-                  "CHO", "VIT", "HYA", "SHS", "ART", "ERM", "SES"]
-        err_s = ""
-        for label in labels:
-            if label not in header_vals:
-                err_s += f", {label}" if len(err_s) != 0 else f"{label}"
-        if len(err_s) > 0:
-            raise ValueError(f"ERROR: Labels {err_s} not in final header")
+            nrrd.write(f, new_data, header)
+    else:
+        data, header = nrrd.read(FLAGS.path)
+        new_data = remove_data_from_label(data, header, FLAGS.label)
 
-        # check for duplicates at the end as well
-        check_duplicate_labels(header)
+        nrrd.write(FLAGS.path, new_data, header)
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -223,10 +174,10 @@ if __name__ == "__main__":
         help="Path to .seg.nrrd files to add new segments to"
     )
     parser.add_argument(
-        "--force",
-        default=False,
-        action="store_true",
-        help="Delete labels not in original labels"
+        "--label",
+        type=str,
+        required=True,
+        help="Name of label to empty. Does not remove the label but deletes the labels within"
     )
     FLAGS, _ = parser.parse_known_args()
     main()
