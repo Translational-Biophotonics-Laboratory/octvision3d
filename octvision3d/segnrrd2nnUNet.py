@@ -18,7 +18,7 @@ def segnrrd2nnUNet(path):
         path (str): The directory path containing the input files.
     """
     
-    output_path = os.path.join(path, "nnUNet_Dataset_v2")
+    output_path = os.path.join(path, "nnUNet_Dataset_v3")
     
     # Create the necessary directories for the nnU-Net dataset
     create_dataset_dirs(output_path)
@@ -27,36 +27,37 @@ def segnrrd2nnUNet(path):
     labelsTr = os.path.join(output_path, "labelsTr")
 
     # Dictionary mapping segmentation labels to their corresponding numeric values
-    # labels_dict = {
-    #     "CNV": 1,  # Choroidal Neovascularization
-    #     "DRU": 2,  # Drusen
-    #     "EX": 3,   # Exudates
-    #     "FLU": 4,  # Fluid
-    #     "GA": 5,   # Geographic Atrophy
-    #     "HEM": 6,  # Hemorrhage
-    #     "RPE": 7,  # Retinal Pigment Epithelium
-    #     "RET": 8,  # Retina
-    #     "CHO": 9,  # Choroid
-    #     "VIT": 10, # Vitreous
-    #     "HYA": 11, # Hyaloid
-    #     "SHS": 12, # Sub-Hyaloid Space
-    #     "ART": 13, # Artifacts
-    #     "ERM": 14, # Epiretinal Membrane
-    #     "SES": 15  # Sub-ERM Space
-    # }
-
     labels_dict = {
         "background": 0,
-        "RPE": 1,  # Retinal Pigment Epithelium
-        "RET": 2,  # Retina
-        "CHO": 3,  # Choroid
-        "VIT": 4, # Vitreous
-        "HYA": 5, # Hyaloid
-        "SHS": 6, # Sub-Hyaloid Space
-        "ART": 7, # Artifacts
-        "ERM": 8, # Epiretinal Membrane
-        "SES": 9  # Sub-ERM Space
+        "CNV": 1,  # Choroidal Neovascularization
+        "DRU": 2,  # Drusen
+        "EX": 3,   # Exudates
+        "FLU": 4,  # Fluid
+        "GA": 5,   # Geographic Atrophy
+        "HEM": 6,  # Hemorrhage
+        "RPE": 7,  # Retinal Pigment Epithelium
+        "RET": 8,  # Retina
+        "CHO": 9,  # Choroid
+        "VIT": 10, # Vitreous
+        "HYA": 11, # Hyaloid
+        "SHS": 12, # Sub-Hyaloid Space
+        "ART": 13, # Artifacts
+        "ERM": 14, # Epiretinal Membrane
+        "SES": 15  # Sub-ERM Space
     }
+
+#    labels_dict = {
+#        "background": 0,
+#        "RPE": 1,  # Retinal Pigment Epithelium
+#        "RET": 2,  # Retina
+#        "CHO": 3,  # Choroid
+#        "VIT": 4, # Vitreous
+#        "HYA": 5, # Hyaloid
+#        "SHS": 6, # Sub-Hyaloid Space
+#        "ART": 7, # Artifacts
+#        "ERM": 8, # Epiretinal Membrane
+#        "SES": 9  # Sub-ERM Space
+#    }
     
     # Retrieve paths for TIFF volumes and segmentation NRRD files, excluding those with "slo" in their names
     vol_paths = [i for i in get_filenames(path, ext="tif") if "slo" not in i]
@@ -74,7 +75,7 @@ def segnrrd2nnUNet(path):
         bitmap, header = nrrd.read(seg_path)
 
         # Remove first 6 labels as they are unused CNV DRU EX FLU GA HEM
-        bitmap = bitmap[6:]
+        # bitmap = bitmap[6:]
 
         # Add an empty 0th layer to account for the expected background label at index 0
         bitmap = np.insert(bitmap, 0, np.zeros((1, *bitmap.shape[1:])), axis=0)
@@ -82,7 +83,7 @@ def segnrrd2nnUNet(path):
         # print number of pixels per label
         # print(bitmap.shape)
         # for i in range(bitmap.shape[0]):
-        #     print(i, bitmap[i].sum())
+            # print(i, bitmap[i].sum())
 
         # Convert one-hot encoded bitmap to label array, flipping axes from (X, Y, Z) to (Z, Y, X)
         labels = np.argmax(bitmap, axis=0).T
@@ -105,7 +106,7 @@ def segnrrd2nnUNet(path):
                           labels=labels_dict,
                           file_ending=".tif",
                           num_training_cases=len(vol_paths),
-                          dataset_name="nnUNet_Dataset_v2")
+                          dataset_name="nnUNet_Dataset_v3")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -43,7 +43,6 @@ if __name__ == "__main__":
     right_shift = -1*FLAGS.right if FLAGS.right > 0 else data.shape[1]
 
     new_bitmap_data = data[:, FLAGS.left: right_shift]
-    new_bitmap_data = new_bitmap_data[:, :, :, 190:209]
     print("Output shape:", new_bitmap_data.shape)
 
     # Add new segmentation information to the header
