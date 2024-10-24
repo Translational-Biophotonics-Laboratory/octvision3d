@@ -17,12 +17,12 @@ def segnrrd2nnUNet(path):
     Args:
         path (str): The directory path containing the input files.
     """
-    
+
     output_path = os.path.join(path, "nnUNet_Dataset_v3")
-    
+
     # Create the necessary directories for the nnU-Net dataset
     create_dataset_dirs(output_path)
-    
+
     imagesTr = os.path.join(output_path, "imagesTr")
     labelsTr = os.path.join(output_path, "labelsTr")
 
@@ -58,15 +58,15 @@ def segnrrd2nnUNet(path):
 #        "ERM": 8, # Epiretinal Membrane
 #        "SES": 9  # Sub-ERM Space
 #    }
-    
+
     # Retrieve paths for TIFF volumes and segmentation NRRD files, excluding those with "slo" in their names
     vol_paths = [i for i in get_filenames(path, ext="tif") if "slo" not in i]
     seg_paths = [i for i in get_filenames(path, ext="seg.nrrd") if "slo" not in i]
-    
+
     for vol_path, seg_path in tqdm(zip(vol_paths, seg_paths), total=len(vol_paths)):
         # Ensure corresponding volume and segmentation files match by their basename
         assert vol_path.split(".")[0] == seg_path.split(".")[0]
-        
+
         vol_name = os.path.splitext(os.path.basename(vol_path))[0]
         seg_name = os.path.basename(vol_path).split(".")[0]
 
@@ -101,7 +101,7 @@ def segnrrd2nnUNet(path):
 
 
     # Generate the dataset JSON file required by nnU-Net
-    generate_dataset_json(output_path, 
+    generate_dataset_json(output_path,
                           channel_names={"0": "OCT"},
                           labels=labels_dict,
                           file_ending=".tif",
