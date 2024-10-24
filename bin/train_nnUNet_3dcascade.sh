@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATASET_NUMBER=2
+DATASET_NUMBER=3
 
 # LowRes 3D UNet
 CUDA_VISIBLE_DEVICES=0 nnUNetv2_train $DATASET_NUMBER 3d_lowres 0 --npz;  # Train first fold individually
