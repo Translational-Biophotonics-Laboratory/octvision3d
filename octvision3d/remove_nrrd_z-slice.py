@@ -18,16 +18,18 @@ if __name__ == "__main__":
         help="Path to .seg.nrrd file to add new segments to"
     )
     parser.add_argument(
-        "--left",
+        "--slice",
         type=int,
         default=0,
-        help="index to skip on the left"
+        help="index to remove"
     )
     parser.add_argument(
-        "--right",
-        type=int,
-        default=0,
-        help="index to skip on the right"
+        "--dryrun",
+        type=bool,
+        default=False,
+        action=argparse.BooleanOptionalAction,
+        help="Enable for dry run"
+
     )
     FLAGS, _ = parser.parse_known_args()
 
@@ -36,17 +38,9 @@ if __name__ == "__main__":
     # Load the NRRD file
     data, header = nrrd.read(FLAGS.path)
     print("Original shape:", data.shape)
-    # for i in range(data.shape[-1]-1):
-    #     for j in range(i+1, data.shape[-1]):
-    #         print("isEqual?", i, j, np.array_equal(data[:, :, :, i], data[:, :, :, j]))
 
-    right_shift = -1*FLAGS.right if FLAGS.right > 0 else data.shape[1]
-
-    new_bitmap_data = data[:, FLAGS.left: right_shift]
-    print("Output shape:", new_bitmap_data.shape)
-
-    # Add new segmentation information to the header
-    pattern = re.compile(r"Segment(\d+)_Extent")
+    new_bitmap_data = np.delete(data, FLAGS.slice, axis=-1)
+    print("New shape:", new_bitmap_data.shape)
 
     copied_odict = OrderedDict()
     for key, value in header.items():
@@ -54,13 +48,10 @@ if __name__ == "__main__":
             copied_odict[key] = new_bitmap_data.shape
         elif key == "space origin":
             copied_odict[key] = np.array([0,0,0])
-        elif re.match(pattern, key):
-            x_dim = int(value.split()[1])
-            new_x_dim = new_bitmap_data.shape[1]
-            if x_dim > new_x_dim:
-                copied_odict[key] = value.replace(str(x_dim), str(new_x_dim))
-            copied_odict[key] = value
         else:
             copied_odict[key] = value
 
-    nrrd.write(output_path, new_bitmap_data, copied_odict)
+    if not FLAGS.dryrun:
+        nrrd.write(output_path, new_bitmap_data, copied_odict)
+    else:
+        print("dryrun finished")

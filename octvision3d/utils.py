@@ -6,7 +6,14 @@ import re
 import os
 
 def get_filenames(path, ext):
+    def either(c):
+        return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c
+    ext = "".join(map(either, ext))
     return sorted(glob(f"{path}/*.{ext}"), key=_natural_sort_key)
+
+def create_directory(path):
+    if not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
 
 def bgr2rgb(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

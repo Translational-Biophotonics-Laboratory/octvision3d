@@ -13,6 +13,6 @@ setup(
             'train_nnUNet_2d=bin.train_nnUNet_2d:main',
             'train_nnUNet_3d=bin.train_nnUNet_3d:main',
             'train_nnUNet_3dcascade=bin.train_nnUNet_3dcascade:main',
-        ]'
+        ]
     }
 )
