@@ -48,6 +48,7 @@ if __name__ == "__main__":
     # Add new segmentation information to the header
     pattern = re.compile(r"Segment(\d+)_Extent")
 
+    print(header)
     copied_odict = OrderedDict()
     for key, value in header.items():
         if key == "sizes":
@@ -63,4 +64,4 @@ if __name__ == "__main__":
         else:
             copied_odict[key] = value
 
-    nrrd.write(output_path, new_bitmap_data, copied_odict)
+    #nrrd.write(output_path, new_bitmap_data, copied_odict)
