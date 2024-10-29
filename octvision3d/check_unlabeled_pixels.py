@@ -4,6 +4,7 @@ import os
 import nrrd
 from octvision3d.utils import overlay_segments, sorted_rgb_colors,\
                               get_filenames
+import tifffile as tiff
 
 def check_unlabeled_pixels(overlay, seg_path):
     """
@@ -38,13 +39,18 @@ def check_unlabeled_pixels(overlay, seg_path):
 
 def main():
     filenames = get_filenames(FLAGS.path, ext=FLAGS.ext)
+    tif_filenames = get_filenames(FLAGS.path, ext="tif")
 
     if len(filenames) == 0:
         raise AssertionError(f"No files with found at {FLAGS.path} ending with {FLAGS.ext}")
 
-    for filename in filenames:
+    for filename, tif_filename in zip(filenames, tif_filenames):
         # load from .seg.nrrd file
         bitmap, header = nrrd.read(filename)
+        tif_img = tiff.imread(tif_filename)
+
+        if tif_img.shape != bitmap.shape[1:][::-1]:
+            raise AssertionError(f"TIF and seg.nrrd bitmap do not have the same shape: {filename}, tif shape: {tif_img.shape}, label: {bitmap.shape[1:][::-1]}")
 
         if bitmap.shape[0] != 15:
             raise AssertionError(f"segmentation shape should have 15 labels. {filename} has {bitmap.shape[0]}")
