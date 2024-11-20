@@ -148,7 +148,7 @@ def segnrrd2nnUNet(path):
                           labels=labels_dict,
                           file_ending=".tif",
                           num_training_cases=len(vol_paths),
-                          dataset_name="nnUNet_Dataset_v3")
+                          dataset_name="nnUNet_Dataset_v4")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
