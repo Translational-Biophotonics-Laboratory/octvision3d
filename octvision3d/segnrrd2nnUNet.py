@@ -36,7 +36,7 @@ def segnrrd2nnUNet(path):
         path (str): The directory path containing the input files.
     """
 
-    output_path = os.path.join(path, "nnUNet_Dataset_v3")
+    output_path = os.path.join(path, f"nnUNet_Dataset_v{FLAGS.version}")
 
     # Create the necessary directories for the nnU-Net dataset
     create_dataset_dirs(output_path)
@@ -148,7 +148,7 @@ def segnrrd2nnUNet(path):
                           labels=labels_dict,
                           file_ending=".tif",
                           num_training_cases=len(vol_paths),
-                          dataset_name="nnUNet_Dataset_v4")
+                          dataset_name=f"nnUNet_Dataset_v{FLAGS.version}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -157,6 +157,13 @@ if __name__ == "__main__":
             type=str,
             required=True,
             help="Path to .seg.nrrd segmentations",
+    )
+    parser.add_argument(
+            "--version",
+            type=str,
+            required=False,
+            default=4,
+            help="Dataset version number",
     )
     parser.add_argument(
             "--combine_PED",
