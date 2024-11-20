@@ -139,7 +139,7 @@ def segnrrd2nnUNet(path):
         output_tif = os.path.join(imagesTr, f"{vol_name}_0000.tif")
         output_labels = os.path.join(labelsTr, f"{seg_name}.tif")
         tif.imwrite(output_tif, vol, photometric='minisblack')
-        #tif.imwrite(output_labels, labels, photometric='minisblack')
+        tif.imwrite(output_labels, labels, photometric='minisblack')
 
 
     # Generate the dataset JSON file required by nnU-Net
