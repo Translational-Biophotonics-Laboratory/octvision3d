@@ -1,3 +1,5 @@
+import os
+import cv2
 import numpy as np
 import tifffile as tif
 from scipy.ndimage import zoom
@@ -7,7 +9,7 @@ from pprint import pprint
 
 def downsample(data, target=19):
     # Calculate the exact step size
-    step_size = data.shape[2] / target
+    step_size = data.shape[0] / target
 
     # Generate indices using the step size
     selected_indices = np.array([int(round(i * step_size)) for i in range(target)])
@@ -23,8 +25,31 @@ def downsample(data, target=19):
 
     # Trim to exact number of target slices
     selected_indices = list(unique_indices[:target])
-    downsampled_data = data[:, :, selected_indices]
+    downsampled_data = data[selected_indices, :, :]
     return downsampled_data
+
+def main():
+    if FLAGS.multifile:
+        filenames = get_filenames(FLAGS.path, ext=f"{FLAGS.ext}*")
+        if len(filenames) == 0:
+            print(f"No files with ext {FLAGS.ext} found in {os.path.abspath(FLAGS.path)}")
+            return
+        if FLAGS.ext == "tif":
+            vol = np.array([tif.imread(f) for f in filenames])
+        else:
+            vol = np.array([cv2.imread(f, cv2.IMREAD_GRAYSCALE) for f in filenames])
+    else:
+        vol = tif.imread(FLAGS.path)
+
+    if vol.shape[0] > 19:
+        vol = downsample(vol)
+
+    if FLAGS.output_dir and FLAGS.output_name:
+        create_directory(FLAGS.output_dir)
+        tif.imwrite(f"{FLAGS.output_dir}/{FLAGS.output_name}", vol)
+        print(f"Saved to {FLAGS.output_dir}/{FLAGS.output_name} with shape: {vol.shape}")
+    else:
+        raise ValueError("Need to specify --output_dir and --output_name in order to save new TIFF file")
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -57,20 +82,12 @@ if __name__ == "__main__":
         default="",
         help="Name of output TIFF file including the extension"
     )
+    parser.add_argument(
+        "--ext",
+        type=str,
+        default="tif",
+        help="Choose file extension of image files"
+    )
     FLAGS, _ = parser.parse_known_args()
 
-    if FLAGS.multifile:
-        filenames = get_filenames(FLAGS.path, ext="tif*")
-        vol = np.array([tif.imread(f) for f in filenames]).T
-    else:
-        vol = tif.imread(FLAGS.path).T
-    
-    if vol.shape[-1] > 19:
-        vol = downsample(vol)
-
-    if FLAGS.output_dir and FLAGS.output_name:
-        create_directory(FLAGS.output_dir)
-        tif.imwrite(f"{FLAGS.output_dir}/{FLAGS.output_name}", vol.T)
-        print(f"Saved to {FLAGS.output_dir}/{FLAGS.output_name}")
-    else:
-        raise ValueError("Need to specify --output_dir and --output_name in order to save new TIFF file")
+    main()
