@@ -15,4 +15,3 @@ fi
 
 ./train_nnUNet_2d.sh $1
 ./train_nnUNet_3d.sh $1
-./train_nnUNet_3dcascade.sh $1
