@@ -5,6 +5,26 @@ import cv2
 import re
 import os
 
+def get_OCT_colors():
+    colors = np.array([
+        [0, 0, 0], # background
+        [241, 214, 145],
+        [177, 122, 101],
+        [111, 184, 210],
+        [216, 101, 79],
+        [221, 130, 101],
+        [144, 238, 144],
+        [162, 0, 255],
+        [143, 143, 112],
+        [224, 240, 252],
+        [117, 250, 252],
+        [176, 252, 209],
+        [252, 252, 84],
+        [56, 125, 247],
+        [100, 50, 0],
+    ])
+    return colors
+
 def get_filenames(path, ext):
     def either(c):
         return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c

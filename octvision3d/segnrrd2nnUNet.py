@@ -162,7 +162,7 @@ if __name__ == "__main__":
             "--version",
             type=str,
             required=False,
-            default=4,
+            default=5,
             help="Dataset version number",
     )
     parser.add_argument(
