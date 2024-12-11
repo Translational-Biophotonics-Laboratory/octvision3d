@@ -13,5 +13,5 @@ if ! [[ "$1" =~ ^[0-9]+$ ]]; then
 	exit 1
 fi
 
-./train_nnUNet_2d.sh $1
+./train_nnUNet_2d.sh $1 
 ./train_nnUNet_3d.sh $1

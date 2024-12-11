@@ -18,16 +18,16 @@ fi
 DATASET_NUMBER=$1
 
 # LowRes 3D UNet
-CUDA_VISIBLE_DEVICES=1 nnUNetv2_train $DATASET_NUMBER 3d_fullres 0 --npz;  # Train first fold individually
+CUDA_VISIBLE_DEVICES=1 nnUNetv2_train $DATASET_NUMBER 3d_fullres 0 -tr CustomNNUNetTrainer -p CustomNNUNetPlans --npz;  # Train first fold individually
 sleep 2
 
-CUDA_VISIBLE_DEVICES=0 nnUNetv2_train $DATASET_NUMBER 3d_fullres 1 --npz & # Train on GPU 0
+CUDA_VISIBLE_DEVICES=0 nnUNetv2_train $DATASET_NUMBER 3d_fullres 1 -tr CustomNNUNetTrainer -p CustomNNUNetPlans --npz & # Train on GPU 0
 sleep 2
-CUDA_VISIBLE_DEVICES=1 nnUNetv2_train $DATASET_NUMBER 3d_fullres 2 --npz;  # Train on GPU 1 
+CUDA_VISIBLE_DEVICES=1 nnUNetv2_train $DATASET_NUMBER 3d_fullres 2 -tr CustomNNUNetTrainer -p CustomNNUNetPlans --npz;  # Train on GPU 1 
 wait
 
-CUDA_VISIBLE_DEVICES=0 nnUNetv2_train $DATASET_NUMBER 3d_fullres 3 --npz & # Train on GPU 0
+CUDA_VISIBLE_DEVICES=0 nnUNetv2_train $DATASET_NUMBER 3d_fullres 3 -tr CustomNNUNetTrainer -p CustomNNUNetPlans --npz & # Train on GPU 0
 sleep 2
-CUDA_VISIBLE_DEVICES=1 nnUNetv2_train $DATASET_NUMBER 3d_fullres 4 --npz;  # Train on GPU 1 
+CUDA_VISIBLE_DEVICES=1 nnUNetv2_train $DATASET_NUMBER 3d_fullres 4 -tr CustomNNUNetTrainer -p CustomNNUNetPlans --npz;  # Train on GPU 1 
 wait
 
