@@ -1,3 +1,20 @@
+"""
+This script converts MATLAB .mat files containing OCT volume data into multi-page TIFF (.tif) format.
+
+Functionality:
+- Loads .mat files from a specified directory
+- Extracts the image volume using a specified dictionary key (default: "images")
+- Transposes and rotates the volume for correct orientation
+- Saves the result as a .tif file with the same base filename
+
+Usage:
+    python script.py --path /path/to/mat/files [--key images]
+
+Notes:
+- The image data must be stored as a NumPy array under the given key
+- Output TIFFs are saved to the same directory as the input .mat files
+"""
+
 import os
 import tifffile as tif
 import numpy as np

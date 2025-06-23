@@ -1,3 +1,21 @@
+"""
+This script verifies that all pixels in segmentation overlays have been labeled (i.e., not black)
+for each slice in a set of .seg.nrrd segmentation files.
+
+Functionality:
+- Loads .seg.nrrd segmentation masks and corresponding TIFF images
+- Applies color overlays to the segmentation using label metadata
+- Checks for and reports any unlabeled (black) pixels in each slice of the overlay
+
+Usage:
+    python script.py --path /path/to/seg/files [--ext seg.nrrd]
+
+Notes:
+- TIFF images must exist alongside .seg.nrrd files with matching filenames
+- Expects segmentations to contain exactly 14 labels
+- Prints location and count of unlabeled pixels per slice, if any are found
+"""
+
 from argparse import ArgumentParser
 import numpy as np
 import os
@@ -52,8 +70,8 @@ def main():
         if tif_img.shape != bitmap.shape[1:][::-1]:
             raise AssertionError(f"TIF and seg.nrrd bitmap do not have the same shape: {filename}, tif shape: {tif_img.shape}, label: {bitmap.shape[1:][::-1]}")
 
-        if bitmap.shape[0] != 15:
-            raise AssertionError(f"segmentation shape should have 15 labels. {filename} has {bitmap.shape[0]}")
+        if bitmap.shape[0] != 14:
+            raise AssertionError(f"segmentation shape should have 14 labels. {filename} has {bitmap.shape[0]}")
 
         # get decimal rgb colors (0-1) from header file sorted (segment0, segment1,...)
         rgb_colors = sorted_rgb_colors(header)

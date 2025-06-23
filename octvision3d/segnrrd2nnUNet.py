@@ -1,10 +1,15 @@
+# This script converts a directory of TIFF OCT volumes and corresponding .seg.nrrd segmentation files 
+# into an nnU-Net-compatible dataset. It creates the appropriate folder structure, converts one-hot 
+# encoded segmentations into class label images (optionally combining CNV and DRU into a single PED label), 
+# saves image spacing metadata, and writes all volumes and labels in TIFF format. It also generates the 
+# nnU-Net `dataset.json` metadata file with channel and label definitions.
+
 import os
 import nrrd
 import argparse
 import numpy as np
 import tifffile as tif
 from tqdm import tqdm
-
 from octvision3d.utils import (get_filenames,
                                create_dataset_dirs,
                                save_json,
@@ -82,21 +87,6 @@ def segnrrd2nnUNet(path):
             "ERM": 13, # Epiretinal Membrane
             "SES": 14  # Sub-ERM Space
         }
-
-
-#    labels_dict = {
-#        "background": 0,
-#        "RPE": 1,  # Retinal Pigment Epithelium
-#        "RET": 2,  # Retina
-#        "CHO": 3,  # Choroid
-#        "VIT": 4, # Vitreous
-#        "HYA": 5, # Hyaloid
-#        "SHS": 6, # Sub-Hyaloid Space
-#        "ART": 7, # Artifacts
-#        "ERM": 8, # Epiretinal Membrane
-#        "SES": 9  # Sub-ERM Space
-#    }
-
     # Retrieve paths for TIFF volumes and segmentation NRRD files, excluding those with "slo" in their names
     vol_paths = [i for i in get_filenames(path, ext="tif") if "slo" not in i]
     seg_paths = [i for i in get_filenames(path, ext="seg.nrrd") if "slo" not in i]
@@ -112,16 +102,8 @@ def segnrrd2nnUNet(path):
         vol = tif.imread(vol_path)
         bitmap, header = nrrd.read(seg_path)
 
-        # Remove first 6 labels as they are unused CNV DRU EX FLU GA HEM
-        # bitmap = bitmap[6:]
-
         # Add an empty 0th layer to account for the expected background label at index 0
         bitmap = np.insert(bitmap, 0, np.zeros((1, *bitmap.shape[1:])), axis=0)
-
-        # print number of pixels per label
-        # print(bitmap.shape)
-        # for i in range(bitmap.shape[0]):
-            # print(i, bitmap[i].sum())
 
         # Convert one-hot encoded bitmap to label array, flipping axes from (X, Y, Z) to (Z, Y, X)
         labels = np.argmax(bitmap, axis=0).T
@@ -140,7 +122,6 @@ def segnrrd2nnUNet(path):
         output_labels = os.path.join(labelsTr, f"{seg_name}.tif")
         tif.imwrite(output_tif, vol, photometric='minisblack')
         tif.imwrite(output_labels, labels, photometric='minisblack')
-
 
     # Generate the dataset JSON file required by nnU-Net
     generate_dataset_json(output_path,
@@ -168,7 +149,7 @@ if __name__ == "__main__":
     parser.add_argument(
             "--combine_PED",
             action="store_true",
-            help="Combines DRU and CNV into a PED category",
+            help="Combines DRU and CNV into a PED (SRM) category",
     )
     FLAGS, _ = parser.parse_known_args()
     segnrrd2nnUNet(FLAGS.path)

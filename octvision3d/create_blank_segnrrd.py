@@ -1,3 +1,9 @@
+# This script generates new, "blank" .seg.nrrd segmentation files for each .tif image in a given directory.
+# For each image (excluding those containing "slo" in the filename), it creates a zero-initialized
+# 4D segmentation volume with 15 labeled channels and injects standardized metadata and colormap 
+# entries into the NRRD header. If a .seg.nrrd file already exists, it is skipped. This is used
+# to bootstrap label files for annotation workflows in 3D Slicer or similar tools.
+
 import nrrd
 import os
 import re
@@ -7,14 +13,21 @@ import tifffile as tif
 from tqdm import tqdm
 from glob import glob
 from collections import OrderedDict
+from octvision3d.utils import get_filenames
 
 def add_new_segnrrd(nrrd_file_path, header, cmap, data):
     """
-    Adds a new segmentation entry to the NRRD file header.
+    Create a new .seg.nrrd file by injecting a fresh set of segments into the header.
 
-    :param nrrd_file_path: Path to the NRRD file.
+    Parameters:
+    - nrrd_file_path: str, path to the output NRRD file to write
+    - header: collections.OrderedDict, existing NRRD header to update
+    - cmap: dict, mapping from segment name (str) to RGB color string (e.g., "255 0 0")
+    - data: np.ndarray, 4D or 3D array representing the segmentation mask volume
+
+    Returns:
+    - None. Writes a new .seg.nrrd file to `nrrd_file_path`
     """
-
     for segment_count, (key, value) in enumerate(cmap.items()):
         new_segment_id = f"Segment_{segment_count+1}"
         header[f'Segment{segment_count}_Color'] = value
@@ -27,19 +40,7 @@ def add_new_segnrrd(nrrd_file_path, header, cmap, data):
     # Save the NRRD file with the updated header
     nrrd.write(nrrd_file_path, data, header)
 
-def get_file_paths(path, ext):
-    return sorted(glob(f"{path}/*.{ext}"))
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--path",
-        type=str,
-        required=True,
-        help="Path to .seg.nrrd files to add new segments to"
-    )
-    FLAGS, _ = parser.parse_known_args()
-
+def main():
     header = OrderedDict([
         ("type", "uint8"),
         ("dimension", 4),
@@ -68,14 +69,28 @@ if __name__ == "__main__":
         ("ERM", "0.22 0.49 0.97"),
         ("SES", "0.392 0.196 0.0"),
     ])
-    for f in tqdm(get_file_paths(FLAGS.path, "tif")):
-        if "slo" not in f:
-            nrrd_f = os.path.splitext(f)[0] + ".seg.nrrd"
-            #print(f, nrrd_f)
-            if os.path.exists(nrrd_f):
-                print(f"Skipping {f}...{nrrd_f} already exists")
-                continue
-            data = np.zeros((len(cmap.keys()), 1, 1, 1), dtype=np.uint8)
-            for k, v in cmap.items():
-                add_new_segnrrd(nrrd_f, header, cmap, data)
+    for f in tqdm(get_filenames(FLAGS.path, "tif")):
+        if "slo" in f.lower():
+            continue
+        nrrd_f = os.path.splitext(f)[0] + ".seg.nrrd"
+        if os.path.exists(nrrd_f):
+            print(f"Skipping {f}...{nrrd_f} already exists")
+            continue
+
+        data = np.zeros((len(cmap.keys()), 1, 1, 1), dtype=np.uint8)
+        # This does write to the file each time per loop, but I would get
+        # invalid file outputs if I didn't do it this way
+        for k, v in cmap.items():
+            add_new_segnrrd(nrrd_f, header, cmap, data)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--path",
+        type=str,
+        required=True,
+        help="Path to .seg.nrrd files to add new segments to"
+    )
+    FLAGS, _ = parser.parse_known_args()
+    main()
 

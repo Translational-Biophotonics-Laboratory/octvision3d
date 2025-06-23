@@ -1,3 +1,20 @@
+"""
+This script organizes a directory of paired TIFF and NRRD segmentation files into batches.
+
+Functionality:
+- Scans a folder for .tif and matching .seg.nrrd files
+- Groups them into batches of a specified size
+- Moves each batch into its own subdirectory named <parent-folder>-<batch_index>
+
+Usage:
+    python script.py --path /path/to/files --batch_size 5
+
+Notes:
+- Assumes equal number of .tif and .seg.nrrd files
+- Filenames are sorted before batching to ensure consistent pairing
+- Each output subfolder will contain up to `batch_size` image-label pairs
+"""
+
 import os
 import shutil
 from argparse import ArgumentParser
@@ -5,6 +22,16 @@ from utils import get_filenames, create_directory
 from tqdm import tqdm
 
 def batch_list(input_list, batch_size=5):
+    """
+    Split a list into smaller batches of a specified size.
+
+    Parameters:
+    - input_list: list, the list to split into batches
+    - batch_size: int, number of items per batch (default: 5)
+
+    Returns:
+    - list of lists: each sublist contains up to `batch_size` items from the original list
+    """
     return [input_list[i:i + batch_size] for i in range(0, len(input_list), batch_size)]
 
 def main():
