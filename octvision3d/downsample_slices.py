@@ -1,3 +1,25 @@
+"""
+This script downsamples a volumetric TIFF stack to a target number of slices (default: 19)
+and saves the result to a specified output path.
+
+Functionality:
+- Supports loading either a single multi-slice TIFF file or a directory of 2D image slices
+- Selects evenly spaced slices based on the target depth
+- Ensures exactly `target` unique slices, even with rounding edge cases
+- Saves the downsampled volume as a new TIFF file
+
+Usage:
+    For a single multi-page TIFF:
+        python script.py --path input.tif --output_dir ./out --output_name output.tif
+
+    For a directory of 2D slices:
+        python script.py --path ./folder --multifile --ext tif --output_dir ./out --output_name output.tif
+
+Notes:
+- Supports grayscale images; uses OpenCV for reading 2D slices and tifffile for TIFF stacks
+- Will raise an error if output path and filename are not provided
+"""
+
 import os
 import cv2
 import numpy as np
@@ -8,6 +30,20 @@ from utils import get_filenames, create_directory
 from pprint import pprint
 
 def downsample(data, target=19):
+    """
+    Downsample a 3D volume to a fixed number of evenly spaced slices along the first axis.
+
+    Parameters:
+    - data: np.ndarray, 3D volume of shape [depth, height, width]
+    - target: int, desired number of output slices (default: 19)
+
+    Returns:
+    - downsampled_data: np.ndarray, volume with shape [target, height, width]
+
+    Notes:
+    - Ensures unique slice indices (avoiding duplicates from rounding)
+    - If necessary, over-generates indices and trims back to exactly `target` slices
+    """
     # Calculate the exact step size
     step_size = data.shape[0] / target
 

@@ -1,3 +1,19 @@
+"""
+This script randomly selects a specified number of (.tif, .json) image-label pairs 
+from each disease category in the training directories (`imagesTr`, `labelsTr`) and 
+moves them to the corresponding test directories (`imagesTs`, `labelsTs`).
+
+It ensures that:
+- Each selected .tif file has a matching .json file
+- Only pairs matching the given disease category are considered
+- The number of selected pairs does not exceed what's available
+
+Usage:
+    python script.py --imagesTr /path/to/imagesTr --labelsTr /path/to/labelsTr \
+                     --imagesTs /path/to/imagesTs --labelsTs /path/to/labelsTs \
+                     --num_pairs 4
+"""
+
 import argparse
 import os
 import random
@@ -5,6 +21,19 @@ import shutil
 
 # Function to get .tif and .json pairs in a directory
 def get_file_pairs(directory, category):
+    """
+    Retrieve pairs of .tif and corresponding .json files from a directory.
+
+    Parameters:
+    - directory: str, path to the directory containing .tif and .json files
+    - category: str, category identifier (used to match the second hyphen-separated field in .tif filenames)
+
+    Returns:
+    - file_pairs: list of tuples, each tuple is (tif_filename, json_filename)
+
+    Raises:
+    - ValueError: if a .json file corresponding to a .tif file is missing
+    """
     tif_files = [f for f in os.listdir(directory) if f.endswith(".tif") and f.split("-")[1] == category]
     file_pairs = []
     for tif_file in tif_files:
@@ -19,6 +48,17 @@ def get_file_pairs(directory, category):
     return file_pairs
 
 def move_files(src_dir, dest_dir, file_pairs):
+    """
+    Move specified .tif and .json file pairs from a source directory to a destination directory.
+
+    Parameters:
+    - src_dir: str, path to the directory where the files currently reside
+    - dest_dir: str, path to the directory where the files should be moved
+    - file_pairs: list of tuples, each tuple contains (.tif filename, .json filename)
+
+    Returns:
+    - None. Files are moved in place using shutil.move
+    """
     for tif_file, json_file in file_pairs:
         # Move .tif file
         shutil.move(os.path.join(src_dir, tif_file), os.path.join(dest_dir, tif_file))
@@ -26,7 +66,7 @@ def move_files(src_dir, dest_dir, file_pairs):
         shutil.move(os.path.join(src_dir, json_file), os.path.join(dest_dir, json_file))
 
 def main():
-    categories = ["NORMAL", "DME", "DRU", "CNV", "ERM"]
+    categories = ["NORMAL", "DME", "DRU", "AMD", "ERM"]
     for category in categories:
         # Get list of paired .tif and .json files for images and labels
         image_pairs = sorted(get_file_pairs(FLAGS.imagesTr, category))
