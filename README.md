@@ -26,25 +26,34 @@ In this repository, we utilize nnUNet with a custom trainer class and the OCTAVE
 ---
 
 ### Getting Started
-#### Prerequisites
+#### Installation
 
-Clone repository and submodule
-  ```sh
-  git clone --recurse-submodules git@github.com:Translational-Biophotonics-Laboratory/octvision3d.git
-  ```
-Installation
-  ```sh
-  # After navigating to root directory (where setup.py is)
-  pip install -e .
-  ```
+1. Clone repository and submodule
+    ```sh
+    git clone --recurse-submodules git@github.com:Translational-Biophotonics-Laboratory/octvision3d.git
+    ```
+
+2. Install [PyTorch](https://pytorch.org/get-started/locally/) as described on their website (conda/pip). **DO NOT JUST INSTALL THIS LIBRARY OR NNUNET WITHOUT PROPERLY INSTALLING PYTORCH FIRST**
+
+3. Install octvision3d and nnUNet. Use pip to install library and dependencies (virtual environment STRONGLY recommended)
+    ```sh
+    # After navigating to the octvision3d root directory (where setup.py is)
+    pip install -e . && pip install -e ./nnUNet
+    pip install -r requirements.txt
+    ```
+
+4. Setup essential environment variables ([instructions](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/set_environment_variables.md))
 
 #### Dataset Configuration
 
+1. Download and extract the [OCTAVE dataset](https://doi.org/10.5281/zenodo.14580071)
+2. Download each of the external datasets
+3. Change segnrrd2nnUNet.py to allow for image only (no labels) conversion to nnUNet format so that users can download external datasets, run downsample_slices.py, run segnrrd2nnUNet.py, and then reshape_images.ipynb (change to script) to get inference-ready images
 
 
-#### nnUNet Setup
+### Additional Info
 
-If you have not worked with nnUNet before, it is HIGHLY recommended you read these first:
+For more detailed information, it is HIGHLY recommended you read the nnUNet documentation:
 >- [Installation instructions](documentation/installation_instructions.md)
 >- [Dataset conversion](documentation/dataset_format.md)
 >- [Usage instructions](documentation/how_to_use_nnunet.md)
