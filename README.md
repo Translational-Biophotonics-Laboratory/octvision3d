@@ -47,8 +47,50 @@ In this repository, we utilize nnUNet with a custom trainer class and the OCTAVE
 #### Dataset Configuration
 
 1. Download and extract the [OCTAVE dataset](https://doi.org/10.5281/zenodo.14580071)
-2. Download each of the external datasets
-3. Change segnrrd2nnUNet.py to allow for image only (no labels) conversion to nnUNet format so that users can download external datasets, run downsample_slices.py, run segnrrd2nnUNet.py, and then reshape_images.ipynb (change to script) to get inference-ready images
+   - The training data is found in `nnUNet_raw/Dataset001_OCTAVE`
+   - The external validation data is found in `nnUNet_raw/external_tests`
+2. The external validation labels is provided, but the images need to be downloaded from the original source links and preprocessed before inference
+    - [Rasti dataset](https://hrabbani.site123.me/available-datasets/dataset-for-oct-classification-50-normal-48-amd-50-dme)
+        - Rasti OCT volumes are provided as a series of single-page TIFF images inside a labeled folder (e.g. `NORMAL (16)/`) for each case.
+        - First, `cd` into the downloaded Rasti dataset folder containing the folders `(AMD, Normal, DME)`
+        - Then run the following shell command to convert each case to a multi-page TIFF with 19 b-scan slices saved to `./rasti_converted`
+            ```sh
+            for i in *; do
+                for j in $i/*; do
+                    python /path/to/octvision3d/downsample_slices.py --path $j --multifile --ext TIFF --output_dir ./rasti_converted --output_name "$(basename "$j").tif";
+                done;
+            done
+            ```
+        - Then, convert to nnUNet format using the following
+          ```sh
+          python /path/to/octvision3d/tif2nnUNet.py --path ./rasti_converted
+          ```
+        - Move `imagesTs` and `dataset.json` from `./rasti_converted/converted_nnUNet` to `OCTAVE/nnUNet_raw/external_tests/Rasti_nnUNet`
+        - Finally, reshape the width and height of both images AND labels to match the training dataset
+          ```sh
+          python /path/to/octvision3d/reshape_images.py --image Rasti_nnUNet/imagesTs --label Rasti_nnUNet/labelsTs
+          ```
+        - The images and labels in the `imagesTs/reshaped` and `labelsTs/reshaped` folder are ready for inference.
+          
+    - [Tian dataset](https://doi.org/10.1371/journal.pone.0133908.s002)  
+        - Tian OCT volumes are provided as a Matlab `.mat` for each case (e.g. `Subject1.mat`)
+        - After downloading, run the following script on the folder with the `.mat` files to convert to a multi-page tiff in the output `./`
+          ```sh
+          python /path/to/octvision3d/convert_mat2tif.py --path ~/Downloads/PLOS_Tian_2015/ --key volumedata --output_dir tian_converted
+          ```
+        - The Tian dataset OCT volumes only have 10 b-scan slices, so we do not need to downsample
+        - Next, convert to nnUnet format using the following
+          ```sh
+          python /path/to/octvision3d/tif2nnUNet.py --path ./tian_converted
+          ```
+        - Move `imagesTs` and `dataset.json` from `./tian_converted/converted_nnUNet` to `OCTAVE/nnUNet_raw/external_tests/Tian_nnUNet`
+        - Finally, reshape the width and height of both images AND labels to match the training dataset
+          ```sh
+          python /path/to/octvision3d/reshape_images.py --image Tian_nnUNet/imagesTs --label Tian_nnUNet/labelsTs
+          ```
+        - The images and labels in the `imagesTs/reshaped` and `labelsTs/reshaped` folder are ready for inference.
+      
+
 
 
 ### Additional Info
