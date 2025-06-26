@@ -119,7 +119,7 @@ In this repository, we utilize nnUNet with a custom trainer class and the OCTAVE
         - Then run the following shell command to convert each case to a multi-page TIFF with 19 b-scan slices saved to `./rasti_converted`
           ```sh
           for i in *; do
-              python /Path/to/octvision3d/downsample_slices.py --path $i --multifile --ext tiff --output_dir ./CAVRIA_converted --output_name "$i.tif";
+              python /path/to/octvision3d/downsample_slices.py --path $i --multifile --ext tiff --output_dir ./CAVRIA_converted --output_name "$i.tif";
           done
           ```
         - Then, convert to nnUNet format using the following
