@@ -4,7 +4,7 @@ This repository hosts the code, datasets, and documentation for the paper:
 
 > **“Identifying Retinal Features Using a Self‑Configuring CNN for Clinical Intervention”**  
 _Daniel S. Kermany, Wesley Poon, Anaya Bawiskar, Natasha Nehra, Orhun Davarci, Glori Das, Matthew Vasquez, Shlomit Schaal, Raksha Raghunathan & Stephen T. C. Wong
-Invest. Ophthalmol. Vis. Sci., June 2, 2025; PMID 40525921_  
+Invest. Ophthalmol. Vis. Sci., June 2, 2025; [PMID 40525921](https://iovs.arvojournals.org/article.aspx?articleid=2803144)_  
 ---
 
 <img src="./icon.png" width="600" height="400" />
