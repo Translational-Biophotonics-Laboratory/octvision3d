@@ -135,7 +135,7 @@ In this repository, we utilize nnUNet with a custom trainer class and the OCTAVE
       
 ### Additional Info
 
-For more detailed information on training and inference, it is HIGHLY recommended you read the nnUNet documentation:
+For more detailed information on nnUNet preprocessing, training, and inference, it is HIGHLY recommended you read the nnUNet documentation:
 >- [Installation instructions](documentation/installation_instructions.md)
 >- [Dataset conversion](documentation/dataset_format.md)
 >- [Usage instructions](documentation/how_to_use_nnunet.md)
