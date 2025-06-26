@@ -20,7 +20,7 @@ import tifffile as tif
 import numpy as np
 import scipy.io
 import argparse
-from utils import get_filenames
+from utils import get_filenames, create_directory
 from tqdm import tqdm
 
 def convert_mat2tif(path, key="images"):
@@ -39,6 +39,10 @@ def convert_mat2tif(path, key="images"):
     """
     # Get a list of .mat file paths
     mat_paths = get_filenames(path, ext="mat")
+
+    # Create output directory
+    output_path = os.path.join(path, FLAGS.output_dir)
+    create_directory(output_path)
     
     # Loop through each .mat file
     for mat_path in tqdm(mat_paths):
@@ -58,7 +62,7 @@ def convert_mat2tif(path, key="images"):
         oct_volume = np.rot90(mat_data[key].T, k=3, axes=(1,2))
         
         # Write the transposed data to a TIFF file
-        tif.imwrite(os.path.join(path, output_filename), oct_volume)
+        tif.imwrite(os.path.join(output_path, output_filename), oct_volume)
 
 if __name__ == "__main__":
     # Parse command line arguments
@@ -74,6 +78,12 @@ if __name__ == "__main__":
         type=str,
         default="images",
         help="dict key to load images from .mat file"
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default="converted",
+        help="Path to output directory"
     )
     FLAGS, _ = parser.parse_known_args()
     

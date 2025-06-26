@@ -24,10 +24,8 @@ import os
 import cv2
 import numpy as np
 import tifffile as tif
-from scipy.ndimage import zoom
 from argparse import ArgumentParser
 from utils import get_filenames, create_directory
-from pprint import pprint
 
 def downsample(data, target=19):
     """
@@ -69,7 +67,12 @@ def main():
         filenames = get_filenames(FLAGS.path, ext=f"{FLAGS.ext}*")
         if len(filenames) == 0:
             print(f"No files with ext {FLAGS.ext} found in {os.path.abspath(FLAGS.path)}")
-            return
+            print(f"Trying files with ext PNG")
+            FLAGS.ext = "PNG"
+            filenames = get_filenames(FLAGS.path, ext=f"{FLAGS.ext}*")
+            if len(filenames) == 0:
+                raise ValueError(f"No TIFF or PNG images found at {FLAGS.path}")
+
         if FLAGS.ext == "tif":
             vol = np.array([tif.imread(f) for f in filenames])
         else:
@@ -83,7 +86,7 @@ def main():
     if FLAGS.output_dir and FLAGS.output_name:
         create_directory(FLAGS.output_dir)
         tif.imwrite(f"{FLAGS.output_dir}/{FLAGS.output_name}", vol)
-        print(f"Saved to {FLAGS.output_dir}/{FLAGS.output_name} with shape: {vol.shape}")
+        print(f"Saved {FLAGS.path} to {FLAGS.output_dir}/{FLAGS.output_name} with shape: {vol.shape}")
     else:
         raise ValueError("Need to specify --output_dir and --output_name in order to save new TIFF file")
 

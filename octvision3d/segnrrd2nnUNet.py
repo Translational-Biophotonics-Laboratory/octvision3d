@@ -3,6 +3,10 @@
 # encoded segmentations into class label images (optionally combining CNV and DRU into a single PED label), 
 # saves image spacing metadata, and writes all volumes and labels in TIFF format. It also generates the 
 # nnU-Net `dataset.json` metadata file with channel and label definitions.
+#
+# Usage:
+#   python segnrrd2nnUNet.py --path /path/to/data --version 5
+#   python segnrrd2nnUNet.py --path /path/to/data --version 5 --combine_PED
 
 import os
 import nrrd
